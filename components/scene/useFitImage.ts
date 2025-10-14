@@ -6,10 +6,10 @@ export function useFitImage(imgWidth: number, imgHeight: number) {
   return useMemo(() => {
     const viewAR = size.width / size.height;
     const imgAR = imgWidth / imgHeight;
-    // contain: scale so the whole image is visible
+    // cover: scale so the image completely fills the viewport
     const scale = imgAR > viewAR
-      ? size.width / imgWidth
-      : size.height / imgHeight;
+      ? size.height / imgHeight
+      : size.width / imgWidth;
     // We return world units; with orthographic camera + unit pixel ratio,
     // we can treat 1 world unit ~ 1 CSS pixel for simplicity here.
     return { width: imgWidth * scale, height: imgHeight * scale };

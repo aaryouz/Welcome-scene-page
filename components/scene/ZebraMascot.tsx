@@ -19,7 +19,7 @@ export default function ZebraMascot() {
   return (
     <group ref={ref} position={[-520, -120, 0]}>
       {/* Tweak scale/position so it feels grounded in front-left */}
-      <Image url="/assets/zebra.png" scale={[400, 700, 1]} transparent />
+      <Image url="/assets/zebra.png" scale={[100, 175]} transparent />
     </group>
   );
 }
