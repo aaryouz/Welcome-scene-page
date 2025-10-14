@@ -18,9 +18,10 @@ export default function BackgroundHouses() {
 
   return (
     <group position={[0, 0, 0]}>
+      {/* Background houses scene */}
       <Image
         url="/assets/houses.png"
-        scale={[width, height, 1]}
+        scale={[width, height]}
         position={[0, 0, -0.1]} // slightly behind hotspots & zebra
         toneMapped={false}
       />

@@ -9,14 +9,25 @@ import HouseHotspots from './HouseHotspots';
 
 function ParallaxRig() {
   const { camera, size } = useThree();
-  const target = useRef(new THREE.Vector3());
+  const targetX = useRef(0);
+  const targetY = useRef(0);
+  const currentX = useRef(0);
+  const currentY = useRef(0);
 
   useFrame(({ pointer }) => {
-    // tiny parallax: move camera a few pixels opposite to mouse
-    const amt = 8; // max pixels
-    const tx = THREE.MathUtils.lerp(0, -pointer.x * amt, 0.1);
-    const ty = THREE.MathUtils.lerp(0,  pointer.y * amt, 0.1);
-    camera.position.set(tx, ty, 10);
+    // Enhanced parallax for more immersive depth feeling
+    const amt = 15; // Increased from 8 for more noticeable effect
+
+    // Update targets
+    targetX.current = -pointer.x * amt;
+    targetY.current = pointer.y * amt;
+
+    // Smooth lerp for fluid motion
+    currentX.current = THREE.MathUtils.lerp(currentX.current, targetX.current, 0.08);
+    currentY.current = THREE.MathUtils.lerp(currentY.current, targetY.current, 0.08);
+
+    // Apply camera movement
+    camera.position.set(currentX.current, currentY.current, 10);
     (camera as THREE.OrthographicCamera).updateProjectionMatrix();
   });
 
