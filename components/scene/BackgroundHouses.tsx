@@ -18,7 +18,7 @@ export default function BackgroundHouses() {
 
   return (
     <group position={[0, 0, 0]}>
-      {/* Background houses scene */}
+      {/* Background houses scene - Night scene with two wooden houses - VCs and Founders - on a boardwalk */}
       <Image
         url="/assets/houses.png"
         scale={[width, height]}

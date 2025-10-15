@@ -1,5 +1,4 @@
 'use client';
-import { useRouter } from 'next/navigation';
 import { useCursor, Html } from '@react-three/drei';
 import { useState, useRef } from 'react';
 import { useUI } from '@/store/ui';
@@ -7,18 +6,22 @@ import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 
 type HotspotProps = {
-  to: string;
   rect: { x: number; y: number; w: number; h: number };
   name: 'vcs' | 'founders';
   label: string;
 };
 
-function Hotspot({ to, rect, name, label }: HotspotProps) {
-  const router = useRouter();
+function Hotspot({ rect, name, label }: HotspotProps) {
   const [hovered, setHovered] = useState(false);
   const [clicking, setClicking] = useState(false);
   const setHover = useUI((s) => s.setHover);
+  const setTargetDoor = useUI((s) => s.setTargetDoor);
+  const setZebraState = useUI((s) => s.setZebraState);
+  const targetDoor = useUI((s) => s.targetDoor);
   const glowRef = useRef<THREE.Mesh>(null!);
+
+  // Check if this door is the current target
+  const isTarget = targetDoor === name;
 
   // Change cursor on hover
   useCursor(hovered);
@@ -43,10 +46,17 @@ function Hotspot({ to, rect, name, label }: HotspotProps) {
     e.stopPropagation();
     setClicking(true);
 
-    // Add a brief delay for the animation to show
+    // Trigger zebra navigation instead of immediate routing
+    setTargetDoor(name);
+    setZebraState('walking');
+
+    // Visual feedback timeout
     setTimeout(() => {
-      router.push(to);
+      setClicking(false);
     }, 300);
+
+    // Note: Actual navigation will happen after zebra arrives
+    // This will be handled in ZebraMascot component
   };
 
   return (
@@ -67,6 +77,19 @@ function Hotspot({ to, rect, name, label }: HotspotProps) {
         {/* Transparent plane as hit area */}
         <planeGeometry args={[rect.w, rect.h]} />
         <meshBasicMaterial transparent opacity={0} />
+
+        {/* Target indicator - door is selected for zebra navigation */}
+        {isTarget && (
+          <mesh position={[0, 0, 0.005]}>
+            <planeGeometry args={[rect.w * 1.15, rect.h * 1.15]} />
+            <meshBasicMaterial
+              color={name === 'vcs' ? '#ffd166' : '#ff6b9d'}
+              transparent
+              opacity={0.15}
+              blending={THREE.AdditiveBlending}
+            />
+          </mesh>
+        )}
 
         {/* Animated glow effect on hover */}
         {hovered && (
@@ -133,30 +156,35 @@ export default function HouseHotspots() {
   // These positions are relative to the center of the screen
   const scale = Math.min(size.width, size.height) / 1080;
 
+  // Based on houses.png analysis (1920x1080):
+  // VCs door: ~480px from left (25%), vertical center ~650px from top
+  // Founders door: ~1280px from left (66.7%), vertical center ~650px from top
+
   // Left door (VCs) - positioned over the left building's door
+  // Door is to the right of the bar window, beneath the VCs sign
   const vcs = {
-    x: -size.width * 0.32,
-    y: -size.height * 0.15,
-    w: 120 * scale,
-    h: 180 * scale,
+    x: -size.width * 0.18, // Adjusted from 0.32 - more centered over actual door
+    y: -size.height * 0.43, // Lowered to match boardwalk/door threshold
+    w: 100 * scale, // Narrower to match actual door width
+    h: 200 * scale, // Taller for full door height
   };
 
   // Right door (FOUNDERS) - positioned over the right building's door
+  // Double door entrance with anchor on the side
   const founders = {
-    x: size.width * 0.15,
-    y: -size.height * 0.15,
-    w: 140 * scale,
-    h: 200 * scale,
+    x: size.width * 0.12, // Adjusted from 0.15 - shifted right to center on door
+    y: -size.height * 0.4, // Same floor level as VCs door
+    w: 120 * scale, // Wider for double door
+    h: 220 * scale, // Taller entrance
   };
 
   return (
     <group>
-      <Hotspot to="/app/vcs" name="vcs" rect={vcs} label="Enter VCs House" />
+      <Hotspot name="vcs" rect={vcs} label="VCs" />
       <Hotspot
-        to="/app/founders"
         name="founders"
         rect={founders}
-        label="Enter Founders House"
+        label="Founders"
       />
     </group>
   );
